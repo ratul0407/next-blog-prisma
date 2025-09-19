@@ -12,9 +12,21 @@ const createPost = async (req: Request, res: Response, next: NextFunction) => {
 
 const getAllPosts = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const page = Number(req.query.page);
-    const limit = Number(req.query.limit);
-    const result = await PostService.getAllPosts(page, limit);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const search = (req.query.search as string) || "";
+    const isFeatured = req.query.isFeatured
+      ? req.query.isFeatured === "true"
+      : undefined;
+    const tags = req.query.tags ? (req.query.tags as string).split(",") : [];
+
+    const result = await PostService.getAllPosts(
+      page,
+      limit,
+      search,
+      isFeatured,
+      tags
+    );
     res.status(201).json(result);
   } catch (error) {
     res.status(500).json(error);
@@ -44,9 +56,24 @@ const deletePostById = async (
     res.status(500).json(error);
   }
 };
+
+const getPostStats = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    console.log("i was here in the controller");
+    const result = await PostService.getPostStats();
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
 export const PostController = {
   createPost,
   getAllPosts,
   getPostById,
   deletePostById,
+  getPostStats,
 };
